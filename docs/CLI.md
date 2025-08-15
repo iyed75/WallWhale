@@ -1798,121 +1798,423 @@ npm run accounts:encode
 
 ### Complete Development Setup
 ```bash
-# 1. Initial setup
+# 1. Initial setup with interactive wizard
 npm start setup
 
-# 2. Generate development certificates
+# 2. Generate development certificates (trusted by browser)
 npm start cert mkcert
 
-# 3. Initialize database
+# 3. Initialize database with migrations
 npm start db migrate
 npm start db seed
 
-# 4. Start development server
+# 4. Prepare Steam accounts
+npm run accounts:decode     # Edit accounts.template
+npm run accounts:encode     # Encrypt for application
+
+# 5. Start development server with hot reload
 npm run dev
 ```
 
-### Production Deployment
+### Production Deployment (Manual)
 ```bash
-# 1. Production setup
-npm start quick-setup --env production --database postgresql
+# 1. Production setup with optimized defaults
+npm start quick-setup \
+  --env production \
+  --database postgresql \
+  --admin-email admin@yourdomain.com \
+  --admin-password "YourSecurePassword123!" \
+  --steam-account "production_steam:production_password"
 
-# 2. Get production certificates
-npm start cert letsencrypt --domain yourdomain.com --email admin@yourdomain.com
+# 2. Get production-grade TLS certificates
+npm start cert letsencrypt \
+  --domain api.yourdomain.com \
+  --email admin@yourdomain.com
 
-# 3. Run production migrations
-npm start db migrate
+# 3. Run production database migrations
+npm run db:migrate:prod
 
-# 4. Start production server
+# 4. Build and start production server
+npm run build:prod
 npm run start:prod
 ```
 
-### Docker Deployment
+### Docker Deployment (Recommended for Production)
 ```bash
-# 1. Setup Docker environment
+# 1. Complete Docker setup wizard
 npm start setup --docker-only
 
-# 2. Start services
+# 2. Start all services with orchestration
 npm start docker --start
 
-# 3. Check status
+# 3. Monitor service health
 npm start docker --status
 
-# 4. View logs
+# 4. View aggregated logs
 npm start docker --logs
 ```
 
-### Bulk Downloads with Hosting
+### Bulk Workshop Downloads with Hosting
 ```bash
-# 1. Download multiple items
+# 1. Download multiple Workshop items and host them
 npm start download host \
-  -i "123456789,987654321,555444333" \
-  -a "steam_account" \
+  -i "123456789,987654321,555444333,777888999" \
+  -a "steam_production_account" \
   -p 8080 \
   --password "download2024" \
   --expire 48
 
-# 2. Access files at http://localhost:8080
-# 3. Files auto-expire after 48 hours
+# 2. Share access information
+echo "📁 Files available at: http://yourserver:8080"
+echo "🔒 Username: wallwhale"
+echo "🔑 Password: download2024"
+echo "⏰ Auto-expires in: 48 hours"
+
+# 3. Monitor download progress
+npm start download list --status running
+
+# 4. Files automatically expire after 48 hours
+```
+
+### Development Workflow with Hot Reload
+```bash
+# Terminal 1: Start development server
+npm run dev
+
+# Terminal 2: Watch for database changes
+npm run db:studio
+
+# Terminal 3: Monitor logs
+tail -f logs/wallwhale.log
+
+# Terminal 4: Test downloads
+npm start download direct -i "123456789" -a "dev_account"
+```
+
+### Team Collaboration Setup
+```bash
+# 1. Team lead sets up encrypted accounts
+npm run accounts:decode
+# Edit accounts.template with shared Steam accounts
+npm run accounts:encode
+
+# 2. Commit encrypted accounts (safe)
+git add accounts.safe .env.example
+git commit -m "Add shared Steam accounts"
+
+# 3. Team members clone and setup
+git clone <repository>
+cp .env.example .env
+# Get ENCRYPTION_SECRET from team lead
+npm start setup --depot-only
+npm start cert mkcert
+npm run dev
+```
+
+### Enterprise Integration Example
+```bash
+# 1. Setup with enterprise database
+npm start quick-setup \
+  --env production \
+  --database postgresql \
+  --admin-email enterprise@company.com
+
+# 2. Setup corporate certificates
+# Copy corporate certificates to certs/ directory
+npm start cert check
+
+# 3. Configure enterprise monitoring
+export ENABLE_METRICS=true
+export ENABLE_HEALTH_CHECKS=true
+export PROMETHEUS_ENDPOINT=http://prometheus.company.com:9090
+
+# 4. Start with enterprise configuration
+npm run start:prod
 ```
 
 ## Exit Codes
 
-WallWhale CLI commands use standard exit codes:
+WallWhale CLI commands use standard exit codes for automation and monitoring:
 
-- `0` - Success
-- `1` - General error
-- `2` - Configuration error
-- `3` - Dependency missing
-- `4` - Permission error
-- `5` - Network error
+- `0` - **Success** - Command completed successfully
+- `1` - **General error** - Unexpected error or command failure
+- `2` - **Configuration error** - Invalid configuration or missing settings
+- `3` - **Dependency missing** - Required dependency not found
+- `4` - **Permission error** - Insufficient file or network permissions
+- `5` - **Network error** - Connection timeout or network failure
+
+**Example usage in scripts:**
+```bash
+#!/bin/bash
+
+# Check if WallWhale is healthy before deployment
+npm start health --url https://api.wallwhale.com
+if [ $? -eq 0 ]; then
+    echo "✅ WallWhale is healthy, proceeding with deployment"
+    ./deploy.sh
+else
+    echo "❌ WallWhale health check failed (exit code: $?)"
+    exit 1
+fi
+```
 
 ## Environment Variables
 
 Key environment variables for CLI operation:
 
+### Core Configuration
 ```bash
 NODE_ENV=development|production    # Environment mode
-HOST=0.0.0.0                      # Server host
+HOST=0.0.0.0                      # Server host binding
 PORT=3000                         # Server port
 TLS_ENABLE=true|false             # Enable TLS/HTTPS
-DATABASE_URL=...                  # Database connection
+```
+
+### Database Configuration  
+```bash
+DATABASE_URL=postgresql://user:pass@host:port/db  # Database connection
+DATABASE_POOL_SIZE=10                             # Connection pool size
+DATABASE_TIMEOUT=30000                            # Query timeout (ms)
+```
+
+### Steam Integration
+```bash
 SAVE_ROOT=./downloads             # Download directory
-LOG_LEVEL=info                    # Logging level
+DEPOT_DOWNLOADER_PATH=./DepotDownloaderMod/DepotDownloaderMod  # Executable path
+ENCRYPTION_SECRET=your-secret-key # Steam account encryption key
+```
+
+### Security & Performance
+```bash
+LOG_LEVEL=info                    # Logging level (debug|info|warn|error)
+RATE_LIMIT_MAX=100               # Requests per window
+RATE_LIMIT_WINDOW=60000          # Rate limit window (ms)
+MAX_UPLOAD_SIZE=100MB            # Maximum file upload size
+REQUEST_TIMEOUT=30000            # HTTP request timeout (ms)
+```
+
+### Feature Toggles
+```bash
+ENABLE_METRICS=true              # Prometheus metrics
+ENABLE_HEALTH_CHECKS=true        # Health monitoring
+DOCS_ENABLED=true                # API documentation
+AUTO_CLEANUP_ENABLED=true        # Automatic file cleanup
 ```
 
 For complete environment configuration, see `docs/CONFIGURATION.md`.
 
 ## Troubleshooting
 
-**Common Issues:**
+### Common Issues and Solutions
 
-1. **DepotDownloader not found**
-   ```bash
-   npm start build-depot
-   ```
+**1. DepotDownloader not found**
+```bash
+# Problem: DepotDownloader executable missing or not accessible
+npm start build-depot
 
-2. **Certificate errors**
-   ```bash
-   npm start cert check
-   npm start cert setup
-   ```
+# Advanced: Manual build verification
+./DepotDownloaderMod/DepotDownloaderMod --help
+chmod +x ./DepotDownloaderMod/DepotDownloaderMod  # Unix permissions
+```
 
-3. **Database connection issues**
-   ```bash
-   npm start config validate
-   npm start db migrate
-   ```
+**2. Certificate errors**
+```bash
+# Problem: TLS certificate issues or browser warnings
+npm start cert check              # Check certificate status
+npm start cert setup             # Interactive certificate setup
 
-4. **Permission errors**
-   ```bash
-   # Ensure proper file permissions
-   chmod +x DepotDownloaderMod/DepotDownloaderMod
-   ```
+# For development: Generate trusted local certificates
+npm start cert mkcert
 
-5. **Port already in use**
-   ```bash
-   npm start --port 3001
-   ```
+# For production: Get proper certificates
+npm start cert letsencrypt -d yourdomain.com -e admin@yourdomain.com
+```
+
+**3. Database connection issues**
+```bash
+# Problem: Cannot connect to database
+npm start config validate         # Validate database configuration
+npm start db migrate             # Apply missing migrations
+
+# Check database status
+npm start health --detailed
+
+# Reset database if corrupted
+npm run db:reset                 # ⚠️ DESTROYS ALL DATA
+npm run db:migrate
+npm run db:seed
+```
+
+**4. Steam authentication failures**
+```bash
+# Problem: Steam account login fails
+npm run accounts:decode          # Check account credentials
+npm run accounts:encode          # Re-encrypt after updates
+
+# Test specific account
+npm start download direct -i "123456789" -a "problem_account"
+
+# Check account status in database
+npm run db:studio               # Browse SteamAccount table
+```
+
+**5. Permission errors**
+```bash
+# Problem: File or directory permission denied
+# Ensure proper file permissions
+chmod +x DepotDownloaderMod/DepotDownloaderMod
+chmod 755 downloads/
+chmod 600 certs/server.key       # Private key security
+
+# Check directory ownership
+ls -la downloads/ certs/ data/
+```
+
+**6. Port already in use**
+```bash
+# Problem: Cannot bind to port (address already in use)
+npm start --port 3001            # Use different port
+npm start health --url http://localhost:3001  # Test new port
+
+# Find what's using the port
+netstat -tulpn | grep :3000      # Linux
+netstat -ano | findstr :3000     # Windows
+```
+
+**7. Docker issues**
+```bash
+# Problem: Docker services won't start
+npm start docker --status        # Check service status
+docker ps -a                     # List all containers
+docker logs wallwhale-app        # Check specific container logs
+
+# Rebuild from scratch
+npm start docker --stop
+docker system prune -a           # Clean Docker cache
+npm start docker --rebuild
+```
+
+**8. Memory or performance issues**
+```bash
+# Problem: High memory usage or slow performance
+npm start health --detailed      # Check resource usage
+npm start config show           # Review configuration
+
+# Optimize configuration
+export NODE_OPTIONS="--max-old-space-size=2048"  # Increase Node.js memory
+export GLOBAL_CONCURRENCY=2     # Reduce concurrent downloads
+export LOG_LEVEL=warn           # Reduce log verbosity
+```
+
+**9. Network connectivity issues**
+```bash
+# Problem: Cannot reach Steam servers or external services
+npm start check                 # Validate network connectivity
+
+# Test Steam connectivity manually
+curl -I https://steamcommunity.com
+ping steamcommunity.com
+
+# Check proxy or firewall settings
+export HTTP_PROXY=http://proxy.company.com:8080
+export HTTPS_PROXY=http://proxy.company.com:8080
+```
+
+**10. Download failures**
+```bash
+# Problem: Workshop downloads fail or timeout
+npm start download list --status failed  # View failed downloads
+
+# Check DepotDownloader logs
+tail -f logs/depot-downloader.log
+
+# Test with minimal example
+npm start download direct -i "123456789" -a "working_account" --keep-temp
+
+# Verify Steam account works
+npm run accounts:decode
+# Test login credentials manually on Steam website
+```
+
+### Advanced Debugging
+
+**Enable Debug Logging:**
+```bash
+# Maximum verbosity for troubleshooting
+export LOG_LEVEL=debug
+export NODE_ENV=development
+npm run dev
+```
+
+**Health Check Script:**
+```bash
+#!/bin/bash
+# comprehensive-health-check.sh
+
+echo "🔍 WallWhale Health Check"
+echo "========================"
+
+# 1. Environment check
+echo "1. Environment validation..."
+npm start check || echo "❌ Environment check failed"
+
+# 2. Service health
+echo "2. Service health..."
+npm start health --detailed || echo "❌ Service health check failed"
+
+# 3. Database connectivity
+echo "3. Database check..."
+npm run db:migrate || echo "❌ Database migration failed"
+
+# 4. Certificate validation
+echo "4. Certificate check..."
+npm start cert check || echo "❌ Certificate validation failed"
+
+# 5. Steam account validation
+echo "5. Steam accounts..."
+npm run accounts:help || echo "❌ Account management failed"
+
+# 6. DepotDownloader test
+echo "6. DepotDownloader test..."
+./DepotDownloaderMod/DepotDownloaderMod --help > /dev/null 2>&1 || echo "❌ DepotDownloader not working"
+
+echo "✅ Health check complete"
+```
+
+**Performance Monitoring:**
+```bash
+# Monitor resource usage during downloads
+npm start download direct -i "123456789" -a "test_account" &
+DOWNLOAD_PID=$!
+
+# Monitor in another terminal
+watch -n 1 "ps aux | grep -E '(node|DepotDownloader)' | grep -v grep"
+watch -n 1 "df -h ."                    # Disk usage
+watch -n 1 "free -h"                    # Memory usage (Linux)
+
+# Kill if needed
+kill $DOWNLOAD_PID
+```
 
 For detailed troubleshooting, see `docs/TROUBLESHOOTING.md`.
+
+### Getting Help
+
+**Community Resources:**
+- 📚 **Documentation**: Check the `docs/` directory for detailed guides
+- 🐛 **Issues**: Report bugs at the project repository
+- 💬 **Discussions**: Join community discussions for help and tips
+- 📧 **Support**: Contact the WallWhale team for enterprise support
+
+**Debug Information Collection:**
+```bash
+# Collect comprehensive debug information
+npm start config show > debug-info.txt
+npm start health --detailed >> debug-info.txt
+npm start cert check >> debug-info.txt
+echo "--- Environment ---" >> debug-info.txt
+env | grep -E "(NODE_ENV|DATABASE_URL|TLS_ENABLE)" >> debug-info.txt
+echo "--- System Info ---" >> debug-info.txt
+node --version >> debug-info.txt
+npm --version >> debug-info.txt
+```
