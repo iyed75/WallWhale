@@ -89,6 +89,20 @@ BCRYPT_ROUNDS=14
 API_KEY_SALT=your-secure-salt-16-chars-minimum
 ```
 
+### Crypto implementation details & migration
+
+- The repository contains a dedicated implementation and developer-facing documentation at `docs/CRYPTO.md` which describes the exact AES-256-GCM format, serialized payload (`iv:authTag:ciphertext`), key derivation, and migration guidance.
+
+- Migration notes:
+  1. The app's `decryptPassword` supports a legacy Base64 fallback to ease migration from older stored values.
+  2. To migrate stored Base64 passwords to the authenticated AES-GCM format:
+     - Decrypt the old value (the app's `decryptPassword` will return the plain text for Base64 inputs).
+     - Re-encrypt using `encryptPassword` (which produces `iv:authTag:ciphertext`).
+     - Persist the new value and verify with a small sampling before bulk replacing records.
+  3. Keep backups and perform any key rotation in a controlled window: keep the old secret available to decrypt, re-encrypt with a new secret, then remove the old secret.
+
+Refer to `docs/CRYPTO.md` for examples, error modes, and operational recommendations.
+
 ## Network Security
 
 ### TLS/HTTPS Configuration

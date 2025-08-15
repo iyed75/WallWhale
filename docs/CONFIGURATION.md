@@ -322,6 +322,11 @@ VALUES (
 - **Database Storage**: Only encrypted passwords stored
 - **Memory Handling**: Passwords cleared from memory after use
 
+## Related implementation docs
+
+- `docs/CRYPTO.md` — Exact implementation details for `src/utils/crypto.ts` including format `iv:authTag:ciphertext`, key derivation, and migration instructions.
+- `docs/ENV.md` — Detailed description of environment schema, validation behaviors, and helper utilities exported by `src/utils/env.ts`.
+
 ## Configuration Best Practices
 
 ### Development
