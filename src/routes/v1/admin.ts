@@ -2,11 +2,11 @@ import type { FastifyInstance } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { encryptPassword } from "../../utils/crypto.js";
 import { AUDIT_ACTIONS } from "../../utils/audit.js";
+import { escape } from "node:querystring";
 
 function requireAdmin(req: any, reply: any) {
   const scopes = req.apiKey?.scopes || [];
-  if (!scopes.includes("admin:*"))
-    return reply.forbidden("Admin scope required");
+  if (!scopes.includes("admin:*")) return reply.forbidden("Admin scope required");
 }
 
 export async function adminRoutes(fastify: FastifyInstance) {
@@ -37,11 +37,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     password: Type.String(),
     displayName: Type.Optional(Type.String()),
     status: Type.Optional(
-      Type.Union([
-        Type.Literal("ACTIVE"),
-        Type.Literal("BANNED"),
-        Type.Literal("INACTIVE"),
-      ])
+      Type.Union([Type.Literal("ACTIVE"), Type.Literal("BANNED"), Type.Literal("INACTIVE")])
     ),
     meta: Type.Optional(Type.String()),
   });
@@ -51,11 +47,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     password: Type.Optional(Type.String()),
     displayName: Type.Optional(Type.String()),
     status: Type.Optional(
-      Type.Union([
-        Type.Literal("ACTIVE"),
-        Type.Literal("BANNED"),
-        Type.Literal("INACTIVE"),
-      ])
+      Type.Union([Type.Literal("ACTIVE"), Type.Literal("BANNED"), Type.Literal("INACTIVE")])
     ),
     meta: Type.Optional(Type.String()),
   });
@@ -122,15 +114,10 @@ export async function adminRoutes(fastify: FastifyInstance) {
       requireAdmin(req, reply);
 
       // Audit log - admin accessed API keys list
-      await fastify.audit.logRequest(
-        req,
-        AUDIT_ACTIONS.ADMIN_DATA_ACCESSED,
-        200,
-        {
-          resource: "api_keys",
-          action: "list",
-        }
-      );
+      await fastify.audit.logRequest(req, AUDIT_ACTIONS.ADMIN_DATA_ACCESSED, 200, {
+        resource: "api_keys",
+        action: "list",
+      });
 
       const keys = await fastify.prisma.apiKey.findMany({
         include: { scopes: true, owner: true },
@@ -149,8 +136,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         maxConcurrent: key.maxConcurrent,
         maxRuntimeSeconds: key.maxRuntimeSeconds,
         meta: key.meta,
-        isActive:
-          !key.revokedAt && (!key.expiresAt || key.expiresAt > new Date()),
+        isActive: !key.revokedAt && (!key.expiresAt || key.expiresAt > new Date()),
         createdAt: key.createdAt.toISOString(),
         updatedAt: key.updatedAt.toISOString(),
       }));
@@ -185,10 +171,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
       const created = await fastify.prisma.apiKey.create({
         data: {
-          key:
-            "key_" +
-            Math.random().toString(36).slice(2, 10) +
-            Date.now().toString(36),
+          key: "key_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
           name: body.name,
           ownerId,
           rateLimit: body.rateLimit,
@@ -199,9 +182,9 @@ export async function adminRoutes(fastify: FastifyInstance) {
           maxRuntimeSeconds: body.maxRuntimeSeconds,
           meta: body.meta,
           scopes: {
-            create: (body.scopes || ["download:read", "download:write"]).map(
-              (s: string) => ({ name: s })
-            ),
+            create: (body.scopes || ["download:read", "download:write"]).map((s: string) => ({
+              name: s,
+            })),
           },
         },
         include: { scopes: true },
@@ -220,9 +203,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         maxConcurrent: created.maxConcurrent,
         maxRuntimeSeconds: created.maxRuntimeSeconds,
         meta: created.meta,
-        isActive:
-          !created.revokedAt &&
-          (!created.expiresAt || created.expiresAt > new Date()),
+        isActive: !created.revokedAt && (!created.expiresAt || created.expiresAt > new Date()),
         createdAt: created.createdAt.toISOString(),
         updatedAt: created.updatedAt.toISOString(),
       };
@@ -310,10 +291,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     async (req, reply) => {
       requireAdmin(req, reply);
       const { id } = req.params as { id: string };
-      const key =
-        "key_" +
-        Math.random().toString(36).slice(2, 10) +
-        Date.now().toString(36);
+      const key = "key_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
       const updated = await fastify.prisma.apiKey.update({
         where: { id },
         data: { key },
@@ -333,24 +311,17 @@ export async function adminRoutes(fastify: FastifyInstance) {
         maxConcurrent: updated.maxConcurrent,
         maxRuntimeSeconds: updated.maxRuntimeSeconds,
         meta: updated.meta,
-        isActive:
-          !updated.revokedAt &&
-          (!updated.expiresAt || updated.expiresAt > new Date()),
+        isActive: !updated.revokedAt && (!updated.expiresAt || updated.expiresAt > new Date()),
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
       };
 
       // Audit log - API key regenerated
-      await fastify.audit.logRequest(
-        req,
-        AUDIT_ACTIONS.API_KEY_REGENERATED,
-        200,
-        {
-          apiKeyId: updated.id,
-          apiKeyName: updated.name,
-          scopes: updated.scopes?.map((s) => s.name) || [],
-        }
-      );
+      await fastify.audit.logRequest(req, AUDIT_ACTIONS.API_KEY_REGENERATED, 200, {
+        apiKeyId: updated.id,
+        apiKeyName: updated.name,
+        scopes: updated.scopes?.map((s) => s.name) || [],
+      });
 
       reply.send(transformedKey);
     }
@@ -382,15 +353,10 @@ export async function adminRoutes(fastify: FastifyInstance) {
       requireAdmin(req, reply);
 
       // Audit log - admin accessed Steam users list
-      await fastify.audit.logRequest(
-        req,
-        AUDIT_ACTIONS.ADMIN_DATA_ACCESSED,
-        200,
-        {
-          resource: "steam_users",
-          action: "list",
-        }
-      );
+      await fastify.audit.logRequest(req, AUDIT_ACTIONS.ADMIN_DATA_ACCESSED, 200, {
+        resource: "steam_users",
+        action: "list",
+      });
 
       const steamUsers = await fastify.prisma.steamUser.findMany({
         select: {
@@ -454,17 +420,12 @@ export async function adminRoutes(fastify: FastifyInstance) {
       });
 
       // Audit log - Steam user created
-      await fastify.audit.logRequest(
-        req,
-        AUDIT_ACTIONS.STEAM_USER_CREATED,
-        201,
-        {
-          steamUserId: created.id,
-          username: created.username,
-          displayName: created.displayName,
-          status: created.status,
-        }
-      );
+      await fastify.audit.logRequest(req, AUDIT_ACTIONS.STEAM_USER_CREATED, 201, {
+        steamUserId: created.id,
+        username: created.username,
+        displayName: created.displayName,
+        status: created.status,
+      });
 
       reply.code(201).send(created);
     }
@@ -501,10 +462,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
       const updateData: any = {};
 
       if (body.username) updateData.username = body.username;
-      if (body.password)
-        updateData.encryptedPassword = encryptPassword(body.password);
-      if (body.displayName !== undefined)
-        updateData.displayName = body.displayName;
+      if (body.password) updateData.encryptedPassword = encryptPassword(body.password);
+      if (body.displayName !== undefined) updateData.displayName = body.displayName;
       if (body.status) updateData.status = body.status;
       if (body.meta !== undefined) updateData.meta = body.meta;
 
@@ -521,6 +480,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
           updatedAt: true,
         },
       });
+      // render the response
 
       reply.send(updated);
     }
@@ -585,15 +545,10 @@ export async function adminRoutes(fastify: FastifyInstance) {
       requireAdmin(req, reply);
 
       // Audit log - admin accessed users list
-      await fastify.audit.logRequest(
-        req,
-        AUDIT_ACTIONS.ADMIN_DATA_ACCESSED,
-        200,
-        {
-          resource: "users",
-          action: "list",
-        }
-      );
+      await fastify.audit.logRequest(req, AUDIT_ACTIONS.ADMIN_DATA_ACCESSED, 200, {
+        resource: "users",
+        action: "list",
+      });
 
       const users = await fastify.prisma.user.findMany();
       reply.send(users);
@@ -653,9 +608,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
           }),
         }),
         querystring: Type.Object({
-          limit: Type.Optional(
-            Type.Integer({ minimum: 1, maximum: 1000, default: 200 })
-          ),
+          limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000, default: 200 })),
         }),
         response: {
           200: Type.Array(
@@ -674,14 +627,9 @@ export async function adminRoutes(fastify: FastifyInstance) {
       const { limit = 200 } = req.query as any;
 
       // Audit log - admin accessed audit logs
-      await fastify.audit.logRequest(
-        req,
-        AUDIT_ACTIONS.AUDIT_LOGS_ACCESSED,
-        200,
-        {
-          limit,
-        }
-      );
+      await fastify.audit.logRequest(req, AUDIT_ACTIONS.AUDIT_LOGS_ACCESSED, 200, {
+        limit,
+      });
 
       const logs = await (fastify.prisma as any).auditLog.findMany({
         orderBy: { createdAt: "desc" },

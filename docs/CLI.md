@@ -144,6 +144,10 @@ Validates the complete environment before starting services:
 
 ### Setup & Configuration
 
+> [!CAUTION]
+>
+> This automated setup WILL prompt for admin privileges in the case of missing software such as mkcert or letsencrypt, and it will also ask for the installation of the DepotDownloader binary if not found.
+
 **Interactive Setup Wizard**
 ```bash
 npm start setup [options]

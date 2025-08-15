@@ -1,6 +1,12 @@
-# 🚀 WallWhale Server Setup Guide
+# 🚀 WallWhale Server and cli Setup Guide
 
 This guide will help you quickly set up and run the WallWhale Server using the interactive setup wizard or Docker.
+
+
+> [!CAUTION]
+>
+> Even though no harm is expected nor has happened during development and testing, this project is still in early development and may contain bugs or incomplete features. The most risky part is the automated setup of the project that WILL in some cases ask for admin privileges, in order to install required software such as mkcert or letsencrypt.
+
 
 ## Quick Start
 
@@ -26,6 +32,10 @@ The wizard will:
 ### Option 2: Quick Setup (Non-interactive)
 
 For quick testing with default settings:
+
+> [!CAUTION]
+>
+> Even though no harm is expected, WallWhale is still in early development and may contain bugs or incomplete features. the most risky part is the automated setup of the project that WILL in some cases ask for admin privileges, in order to install required sofwtare such as mkcert or letsencrypt.
 
 ```bash
 # Quick setup with defaults

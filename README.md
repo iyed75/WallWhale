@@ -2,13 +2,34 @@
 
 [![GitHub Stars](https://img.shields.io/github/stars/MIKTHATGUY/WallWhale?style=social)](https://github.com/MIKTHATGUY/WallWhale) [![Issues](https://img.shields.io/github/issues/MIKTHATGUY/WallWhale)](https://github.com/MIKTHATGUY/WallWhale/issues) [![License](https://img.shields.io/github/license/MIKTHATGUY/WallWhale)](LICENSE) [![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
 
-[![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](https://hub.docker.com) [![TypeScript](https://img.shields.io/badge/typescript-5.9-blue?logo=typescript)](https://typescriptlang.org) [![Fastify](https://img.shields.io/badge/fastify-5.5-green?logo=fastify)](https://fastify.io) [![Prisma](https://img.shields.io/badge/prisma-6.14-purple?logo=prisma)](https://prisma.io)
+[![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](https://hub.docker.com) [![TypeScript](https://img.shields.io/badge/typescript-5.9-blue?logo=typescript)](https://typescriptlang.org) [![Fastify](https://img.shields.io/badge/fastify-5.5-green?logo=fastify)](https://fastify.io) [![Prisma](https://img.shields.io/badge/prisma-6.14-purple?logo=prisma)](https://prisma.io)   [![Codacy Badge](https://app.codacy.com/project/badge/Grade/67ecdc83730a4022b3bd408ef6a1a8d8)](https://app.codacy.com/gh/MIKTHATGUY/WallWhale/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-**WallWhale** is a production-ready server for downloading and hosting Steam
-Workshop content with enterprise features. Built with TypeScript, Fastify,
+**WallWhale** is a server and cli-tool for downloading and hosting Steam
+Built with TypeScript, Fastify,
 and Prisma, it provides secure API access, multi-account Steam integration,
 audit logging, and comprehensive monitoring. The system supports bulk downloads,
-automated deployments, and scales horizontally with Docker and Kubernetes.
+automated deployments, and scales horizontally with Docker.
+## Important Notices
+
+> [!WARNING]
+> **Docker Support Status: Experimental**
+> 
+> The current Docker implementation is in experimental status. While Docker is supported as a deployment target, functionality has not been fully validated in all environments. Production use is not recommended at this time as it may result in container instability or data integrity issues.
+
+> [!NOTE]
+> **Development Status: Active**
+> 
+> This project is under active development with an evolving API surface. Core functionality and interfaces may undergo significant changes without prior notification. Please consider this when implementing integration solutions.
+
+> [!IMPORTANT]
+> **Legal Information**
+> 
+> - **No Official Affiliation**: WallWhale is an independent project with no affiliation, endorsement, or official connection to Valve Corporation or Steam.
+> - **Supported Content**: This tool is specifically optimized for [Wallpaper Engine](https://www.wallpaperengine.io/en) content. While adaptable for other purposes with minor changes, no additional content types are officially supported.
+> - **Compliance Requirements**: In accordance with the Steam Subscriber Agreement, WallWhale requires valid credentials and will only download content legitimately owned by or accessible to the provided account. The tool respects and enforces all ownership verification.
+> - **User Responsibility**: Users bear sole responsibility for ensuring their legal right to use provided credentials. Project maintainers do not verify credential ownership and assume no liability for credential misuse.
+
+
 
 Get started in 60 seconds:
 
@@ -18,7 +39,7 @@ docker-compose up -d
 curl http://localhost:3000/health
 
 # Local development
-npm install && npm run db:push && npm run setup && npm run dev
+git clone https://github.com/MIKTHATGUY/WallWhale/ && cd WallWhale&& npm install && npm run db:push && npm run setup && npm run dev
 ```
 
 ## Core components
@@ -346,8 +367,8 @@ WallWhale is designed for enterprise environments with:
 - **Scalability** - Horizontal scaling with Docker and Kubernetes
 - **Security** - Enterprise-grade security features and audit compliance
 - **Monitoring** - Production-ready observability and alerting
-- **Support** - Comprehensive documentation and community support
+- **Support** - ~~Comprehensive documentation~~ and community support
 
 ---
 
-**Built with ❤️ for the Steam Workshop community**
+**Built with ❤️ for the WallpaperEngine community**
