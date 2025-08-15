@@ -1,8 +1,139 @@
-# 🚀 WallWhale
+<img src="docs/images/banner.png"  />
 
-A production-ready enterprise server for Steam Workshop content downloads, built with Node.js, TypeScript, and Fastify. Features secure API access, multi-account management, real-time monitoring, and comprehensive audit logging.
+[![GitHub Stars](https://img.shields.io/github/stars/MIKTHATGUY/WallWhale?style=social)](https://github.com/MIKTHATGUY/WallWhale) [![Issues](https://img.shields.io/github/issues/MIKTHATGUY/WallWhale)](https://github.com/MIKTHATGUY/WallWhale/issues) [![License](https://img.shields.io/github/license/MIKTHATGUY/WallWhale)](LICENSE) [![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
 
-## ✨ Key Features
+[![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](https://hub.docker.com) [![TypeScript](https://img.shields.io/badge/typescript-5.9-blue?logo=typescript)](https://typescriptlang.org) [![Fastify](https://img.shields.io/badge/fastify-5.5-green?logo=fastify)](https://fastify.io) [![Prisma](https://img.shields.io/badge/prisma-6.14-purple?logo=prisma)](https://prisma.io)
+
+**WallWhale** is a production-ready server for downloading and hosting Steam
+Workshop content with enterprise features. Built with TypeScript, Fastify,
+and Prisma, it provides secure API access, multi-account Steam integration,
+audit logging, and comprehensive monitoring. The system supports bulk downloads,
+automated deployments, and scales horizontally with Docker and Kubernetes.
+
+Get started in 60 seconds:
+
+```bash
+# Docker (recommended)
+docker-compose up -d
+curl http://localhost:3000/health
+
+# Local development
+npm install && npm run db:push && npm run setup && npm run dev
+```
+
+## Core components
+
+**API Server** (`src/index.ts`, `src/routes/`) - Fastify web server with
+authentication, rate limiting, and OpenAPI documentation. Handles download
+requests, user management, and real-time monitoring endpoints.
+
+**Download Engine** (`src/services/downloadService.ts`, `src/utils/depotDownloader.ts`) -
+Orchestrates Steam Workshop downloads using the DepotDownloader binary.
+Manages concurrent downloads, queue processing, and retry logic.
+
+**Database Layer** (`prisma/schema.prisma`, `src/plugins/prisma.ts`) - Prisma
+ORM with SQLite/PostgreSQL support. Stores user accounts, download history,
+audit logs, and system configuration.
+
+**Authentication System** (`src/plugins/auth.ts`, `src/utils/crypto.ts`) -
+Dual authentication with JWT tokens and API keys. Supports role-based access
+control and session management.
+
+**CLI Tools** (`src/commands/`, `src/utils/`) - Command-line interface for
+server setup, certificate management, direct downloads, and maintenance
+operations.
+
+**File Hosting** (`src/utils/fileHosting.ts`, `src/utils/directDownload.ts`) -
+Static file server with password protection, download tracking, and bandwidth
+limiting for serving downloaded workshop content.
+
+**Monitoring & Logging** (`src/plugins/audit.ts`, `src/utils/audit.ts`) -
+Comprehensive audit logging, Prometheus metrics, health checks, and
+structured JSON logging for production observability.
+
+**Security Layer** (`src/utils/certificates.ts`, `src/plugins/register.ts`) -
+TLS certificate management, input validation, CORS configuration, and
+secure headers for production deployments.
+
+## API workflow
+
+Download a workshop item:
+
+```bash
+curl -X POST http://localhost:3000/v1/downloads \
+  -H "Authorization: Bearer your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"workshopId": "123456789", "steamAccount": "account_name"}'
+```
+
+Monitor progress:
+
+```bash
+curl http://localhost:3000/v1/downloads/download-id \
+  -H "Authorization: Bearer your-api-key"
+```
+
+## Production deployment
+
+Docker Compose with external database:
+
+```bash
+# Set environment variables
+export DATABASE_URL="postgresql://user:pass@host:5432/wallwhale"
+export JWT_SECRET="your-jwt-secret"
+
+# Deploy
+docker-compose -f docker-compose.prod.yml up -d
+
+# Verify deployment
+curl https://your-domain.com/health
+```
+
+## How to contribute
+
+1. Fork the repo and create a branch for your change.
+2. Install and run the app locally:
+
+```cmd
+copy .env.example .env
+npm install
+npm run dev
+```
+
+3. Run tests and linters before submitting a PR:
+
+```cmd
+npm run test
+npm run lint
+```
+
+4. Open a PR describing the change and linking related issues.
+
+See `docs/CONTRIBUTING.md` for detailed guidelines.
+
+## Docs & quick links
+
+- Features · docs/FEATURES.md
+- Architecture · docs/ARCHITECTURE.md
+- Configuration · docs/CONFIGURATION.md
+- API · docs/API.md
+- CLI · docs/CLI.md
+- Development · docs/DEVELOPMENT.md
+- Security · docs/SECURITY.md
+- Troubleshooting · docs/TROUBLESHOOTING.md
+
+## Support
+
+- Issues: https://github.com/MIKTHATGUY/WallWhale/issues
+- Docs: `docs/` folder in this repository
+
+## Acknowledgements
+
+Built for the Steam Workshop community. Thanks to contributors listed on the GitHub contributors tab.
+
+---
+
+If anything is unclear, open an issue and we’ll help you get started.
 
 - **🔐 Enterprise Security** - JWT authentication, API keys, role-based access, audit logging
 - **⚡ High Performance** - Concurrent downloads, intelligent queuing, rate limiting
