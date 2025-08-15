@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false,
+    "inlineSources": false,
+    "declaration": false,
+    "declarationMap": false,
+    "removeComments": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "docs",
+    "test/**/*",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "prisma/seed.ts"
+  ]
+}

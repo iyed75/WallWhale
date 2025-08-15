@@ -1,0 +1,31 @@
+# Server
+PORT=3000
+HOST=localhost
+NODE_ENV=development
+
+# Logging
+LOG_FORMAT=pretty
+LOG_LEVEL=info
+
+# Admin bootstrap
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-me
+
+# Storage paths
+SAVE_ROOT=c:\\SteamLibrary\\steamapps\\workshop\\content
+REQUIRE_SUBPATH=projects\\myprojects
+
+# Security
+JWT_SECRET=super-secure-jwt-secret-key-minimum-32-characters-long-development-only
+API_KEY_SALT=secure-api-key-salt-16-chars-minimum-dev
+ENCRYPTION_SECRET=your-encryption-secret-change-this-in-production
+IP_ALLOW_LIST=
+IP_DENY_LIST=
+
+# TLS (built-in)
+TLS_ENABLE=true
+TLS_KEY_PATH=certs\key.pem
+TLS_CERT_PATH=certs\cert.pem
+
+# Database
+DATABASE_URL="file:./dev.db"

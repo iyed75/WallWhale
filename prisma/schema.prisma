@@ -1,0 +1,132 @@
+enum SteamUserStatus {
+    ACTIVE
+    BANNED
+    INACTIVE
+}
+
+model SteamUser {
+    id                String          @id @default(cuid())
+    name              String          @unique
+    username          String          @unique
+    encryptedPassword String          @map("password")
+    displayName       String?
+    status            SteamUserStatus @default(ACTIVE)
+    meta              String?
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    deletedAt         DateTime?
+}
+
+// Prisma schema for WallWhale Server
+// SQLite for dev; use PostgreSQL in prod by setting DATABASE_URL
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+// NOTE: Prisma requires a static provider. Use "sqlite" for dev by default.
+// For production with PostgreSQL, switch provider below to "postgresql" and set DATABASE_URL accordingly.
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    ADMIN
+    USER
+}
+
+enum DownloadStatus {
+    QUEUED
+    RUNNING
+    SUCCESS
+    FAILED
+    CANCELED
+}
+
+model User {
+    id        String     @id @default(cuid())
+    email     String     @unique
+    password  String
+    role      Role       @default(USER)
+    apiKeys   ApiKey[]
+    downloads Download[] @relation("UserDownloads")
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    deletedAt DateTime?
+}
+
+model ApiKey {
+    id                  String        @id @default(cuid())
+    key                 String        @unique
+    name                String
+    ownerId             String
+    owner               User          @relation(fields: [ownerId], references: [id])
+    scopes              ApiKeyScope[]
+    rateLimit           Int? // requests per minute
+    quotaDaily          Int?
+    quotaMonthly        Int?
+    usageDaily          Int           @default(0)
+    usageMonthly        Int           @default(0)
+    usageDailyResetAt   DateTime? // if null, set on first use
+    usageMonthlyResetAt DateTime?
+    maxConcurrent       Int? // per-key concurrency cap
+    maxRuntimeSeconds   Int? // per-job runtime limit for this key
+    expiresAt           DateTime?
+    revokedAt           DateTime?
+    meta                String?
+    createdAt           DateTime      @default(now())
+    updatedAt           DateTime      @updatedAt
+    deletedAt           DateTime?
+    downloads           Download[]
+    auditLogs           AuditLog[]
+}
+
+model Download {
+    id          String         @id @default(cuid())
+    pubfileId   String
+    status      DownloadStatus @default(QUEUED)
+    saveRoot    String
+    accountName String
+    createdById String
+    createdBy   User           @relation(name: "UserDownloads", fields: [createdById], references: [id])
+    apiKeyId    String?
+    apiKey      ApiKey?        @relation(fields: [apiKeyId], references: [id])
+    startedAt   DateTime?
+    finishedAt  DateTime?
+    error       String?
+    zipPath     String?
+    logs        JobLog[]
+    createdAt   DateTime       @default(now())
+    updatedAt   DateTime       @updatedAt
+    deletedAt   DateTime?
+}
+
+model JobLog {
+    id         String   @id @default(cuid())
+    downloadId String
+    download   Download @relation(fields: [downloadId], references: [id])
+    level      String   @default("info")
+    message    String
+    createdAt  DateTime @default(now())
+}
+
+model ApiKeyScope {
+    id       String  @id @default(cuid())
+    name     String
+    apiKey   ApiKey? @relation(fields: [apiKeyId], references: [id])
+    apiKeyId String?
+}
+
+model AuditLog {
+    id        String   @id @default(cuid())
+    apiKeyId  String?
+    apiKey    ApiKey?  @relation(fields: [apiKeyId], references: [id])
+    userId    String?
+    action    String
+    ip        String?
+    route     String?
+    method    String?
+    status    Int?
+    createdAt DateTime @default(now())
+}
